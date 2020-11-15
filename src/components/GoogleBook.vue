@@ -1,5 +1,8 @@
 <template>
   <b-container>
+    <div class="alert alert-danger" role="alert" v-bind:style="{display: display}">
+      Impossible d'accéder à l'API de Google Books
+    </div>
     <b-row>
       <b-col cols="3">
         <b-input-group size="sm">
@@ -79,6 +82,7 @@ export default {
   name: 'GoogleBook',
   data () {
     return {
+      display: 'none',
       empty: true,
       infos: [],
       items: '',
@@ -123,17 +127,15 @@ export default {
         this.infoLink = item.volumeInfo.infoLink ? item.volumeInfo.infoLink : ''
         this.previewLink = item.volumeInfo.previewLink ? item.volumeInfo.previewLink : ''
         this.caconicalVolumeLink = item.volumeInfo.caconicalVolumeLink ? item.volumeInfo.caconicalVolumeLink : ''
-        result.push(
-          {
-            'title': this.title,
-            'authors': this.authors,
-            'price': this.price,
-            'buyLink': this.buyLink,
-            'infoLink': this.infoLink,
-            'previewLink': this.previewLink,
-            'caconicalVolumeLink': this.caconicalVolumeLink
-          }
-        )
+        result.push({
+          'title': this.title,
+          'authors': this.authors,
+          'price': this.price,
+          'buyLink': this.buyLink,
+          'infoLink': this.infoLink,
+          'previewLink': this.previewLink,
+          'caconicalVolumeLink': this.caconicalVolumeLink
+        })
       })
       return result
     },
@@ -142,6 +144,9 @@ export default {
       if (this.filter !== '') {
         axios.get('https://www.googleapis.com/books/v1/volumes?q=' + this.filter + '&maxResults=40')
           .then(response => (this.infos = response.data.items))
+          .catch((e) => {
+            this.display = 'inline'
+          })
       } else {
         this.infos = null
         this.totalRows = 0
