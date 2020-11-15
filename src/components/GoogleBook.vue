@@ -1,58 +1,76 @@
 <template>
-  <div class="container">
-  <b-col>
-    Nombre total de livres: {{totalRows}}
-  </b-col>
-  <b-input-group size="sm">
-    <b-form-input
-      v-model="filter"
-      v-on:keyup="getBooks()"
-      type="search"
-      id="filterInput"
-      placeholder="Rechercher des livres...">
-    </b-form-input>
-    <b-input-group-append>
-      <b-button :disabled="!filter" @click="filter = ''">Clear
-      </b-button>
-    </b-input-group-append>
-  </b-input-group>
-    <b-table
-      v-if="isNotEmpty()"
-      show-empty
-      striped
-      hover
-      outlined
-      :items="getData()"
-      :fields="fields"
-      :filter="filter"
-      @filtered="onFiltered"
-      :current-page="currentPage"
-      :per-page="perPage">
+  <b-container>
+    <b-row>
+      <b-col cols="3">
+        <b-input-group size="sm">
+          <b-form-input
+            v-model="filter"
+            v-on:keyup="getBooks()"
+            type="search"
+            id="filterInput"
+            placeholder="Rechercher des livres...">
+          </b-form-input>
+          <b-input-group-append>
+            <b-button :disabled="!filter" @click="filter = ''">Clear
+            </b-button>
+          </b-input-group-append>
+        </b-input-group>
+      </b-col>
+      <b-col offsets="2" class="text-right">
+        Nombre total de livres: {{totalRows}}
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col cols="12">
+        <!-- Affichage du tableau avec data -->
+        <b-table
+          v-if="isNotEmpty()"
+          show-empty
+          striped
+          hover
+          outlined
+          :items="getData()"
+          :fields="fields"
+          :filter="filter"
+          @filtered="onFiltered"
+          :current-page="currentPage"
+          :per-page="perPage">
 
-      <template #cell(buyLink)="data">
-        <a :href="data.item.buyLink">{{data.item.buyLink}}</a>
-      </template>
+          <template #cell(buyLink)="data">
+            <a :href="data.item.buyLink">{{data.item.buyLink}}</a>
+          </template>
 
-    </b-table>
-    <b-table
-      v-else
-      show-empty
-      striped
-      hover
-      outlined
-    >
-    </b-table>
-    <div>
-      <b-pagination
-        v-model="currentPage"
-        :total-rows="totalRows"
-        :per-page="perPage"
-        align="fill"
-        size="sm"
-        class="my-0"
-      ></b-pagination>
-    </div>
-  </div>
+          <template #table-colgroup="scope">
+          <col
+            v-for="field in scope.fields"
+            :key="field.key"
+            :style="{ width: '100px' }"
+          >
+          </template>
+        <!-- Affichage vide du tableau si aucune data -->
+        </b-table>
+        <b-table
+          v-else
+          :fields="fields"
+          show-empty
+          striped
+          hover
+          outlined
+        >
+        </b-table>
+     </b-col>
+    </b-row>
+    <b-row>
+      <b-col cols="12">
+        <b-pagination
+          v-model="currentPage"
+          :total-rows="totalRows"
+          :per-page="perPage"
+          align="fill"
+        ></b-pagination>
+      </b-col>
+    </b-row>
+  </b-container>
 </template>
 
 <script>
@@ -84,6 +102,7 @@ export default {
         },
         {
           key: 'buyLink',
+          stickyColumn: true,
           label: 'Lien vers l\'article'
         }
       ]
@@ -93,6 +112,7 @@ export default {
     this.totalRows = this.items.length
   },
   methods: {
+    // On récupère les datas de l'API
     getData () {
       let result = []
       this.infos.map(item => {
@@ -118,6 +138,7 @@ export default {
       return result
     },
     getBooks () {
+      // Dans l'api de GoogleBooks on ne peut pas avoir plus de 40 résultats par appel
       if (this.filter !== '') {
         axios.get('https://www.googleapis.com/books/v1/volumes?q=' + this.filter + '&maxResults=40')
           .then(response => (this.infos = response.data.items))
