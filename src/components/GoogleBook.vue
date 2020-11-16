@@ -34,8 +34,7 @@
           outlined
           :items="getData()"
           :fields="fields"
-          :filter="filter"
-          @filtered="onFiltered"
+          :filter="getData()"
           :current-page="currentPage"
           :per-page="perPage">
 
@@ -85,8 +84,6 @@ export default {
       display: 'none',
       empty: true,
       infos: [],
-      items: '',
-      url: '',
       filter: '',
       totalRows: 0,
       currentPage: 1,
@@ -112,9 +109,6 @@ export default {
       ]
     }
   },
-  mounted () {
-    this.totalRows = this.items.length
-  },
   methods: {
     // On récupère les datas de l'API
     getData () {
@@ -137,6 +131,7 @@ export default {
           'caconicalVolumeLink': this.caconicalVolumeLink
         })
       })
+      this.totalRows = result.length
       return result
     },
     getBooks () {
@@ -152,16 +147,13 @@ export default {
         this.totalRows = 0
       }
     },
-    onFiltered (filteredItems) {
-      this.totalRows = filteredItems.length
-    },
     isNotEmpty () {
       if (!this.filter || !this.infos) {
         this.infos = null
         this.totalRows = 0
       }
       return this.filter && this.infos
-    }
+    },
   }
 }
 </script>
