@@ -1,7 +1,7 @@
 <template>
   <b-container>
     <div class="alert alert-danger" role="alert" v-bind:style="{display: display}">
-      Impossible d'accéder à l'API de Google Books
+      {{error}}
     </div>
     <b-row>
       <b-col cols="3">
@@ -84,6 +84,7 @@ export default {
       display: 'none',
       empty: true,
       infos: [],
+      error: '',
       filter: '',
       totalRows: 0,
       currentPage: 1,
@@ -136,11 +137,12 @@ export default {
     },
     getBooks () {
       // Dans l'api de GoogleBooks on ne peut pas avoir plus de 40 résultats par appel
-      if (this.filter !== '') {
-        axios.get('https://www.googleapis.com/books/v1/volumes?q=' + this.filter + '&maxResults=40')
+      if (this.filter.trim() !== '') {
+        axios.get('https://www.googleapis.com/books/v1/volumes?q=' + this.filter.trim() + '&maxResults=40')
           .then(response => (this.infos = response.data.items))
           .catch((e) => {
             this.display = 'inline'
+            this.error = e
           })
       } else {
         this.infos = null
@@ -153,7 +155,7 @@ export default {
         this.totalRows = 0
       }
       return this.filter && this.infos
-    },
+    }
   }
 }
 </script>
